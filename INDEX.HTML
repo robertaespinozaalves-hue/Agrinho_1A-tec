@@ -1,0 +1,179 @@
+// ==========================================================================
+// DATA OBJECTS ARRAYS (CAROUSEL & ACCORDION DATA)
+// ==========================================================================
+
+const REGIONS_DATA = [
+    {
+        name: "Centro-Oeste",
+        tag: "Tropical Semiúmido",
+        desc: "Estabilidade climática marcante com período de seca bem definido. Essencial para o planejamento preciso de safras massivas de soja e milho.",
+        meta: "Foco: Janelas de Plantio e Manejo Hídrico."
+    },
+    {
+        name: "Sul",
+        tag: "Subtropical Úmido",
+        desc: "Chuvas bem distribuídas, mas com riscos latentes de geadas severas. Ideal para culturas de inverno de alta densidade e grãos selecionados.",
+        meta: "Foco: Alertas de Geada e Climatologia de Precisão."
+    },
+    {
+        name: "Sudeste",
+        tag: "Tropical de Altitude / Atlântico",
+        desc: "Microclimas complexos determinados pelo relevo. Perfeito para plantações verticais e de alta produtividade como café corporativo e cana-de-açúcar.",
+        meta: "Foco: Zoneamento Agrícola de Precisão."
+    },
+    {
+        name: "Nordeste",
+        tag: "Semioárido / Tropical Litorâneo",
+        desc: "Alta radiação solar com regimes hídricos desafiadores no interior e estabilidade no Matopiba. Transforma grandes áreas via fertirrigação inteligente.",
+        meta: "Foco: Gerenciamento Avançado de Irrigação."
+    },
+    {
+        name: "Norte",
+        tag: "Equatorial Úmido",
+        desc: "Altos índices pluviométricos o ano inteiro. Exige forte gestão de drenagem e monitoramento de pragas favorecidas pela umidade contínua.",
+        meta: "Foco: Sustentabilidade e Manejo Agroflorestal."
+    }
+];
+
+const FAQ_DATA = [
+    {
+        question: "Como o AgroClima ajuda na sustentabilidade de grandes latifúndios?",
+        answer: "Ajudamos correlacionando taxas de evapotranspiração reais com a previsão de precipitação imediata. Isso permite que sistemas automatizados de irrigação só gastem água quando estritamente necessário, preservando lençóis freáticos e bacias hidrográficas."
+    },
+    {
+        question: "Os dados são atualizados em qual frequência para plantações de grande porte?",
+        answer: "Nossa infraestrutura trabalha com atualizações via satélite em tempo real a cada 15 minutos, além de gerar modelos preditivos avançados ajustados para as coordenadas geográficas específicas do seu campo produtivo."
+    },
+    {
+        question: "É possível integrar a plataforma ao maquinário agrícola automatizado?",
+        answer: "Sim. Nossos relatórios de dados e previsões geram saídas prontas para integração de APIs com os principais softwares de telemetria e maquinários autônomos de larga escala do mercado."
+    }
+];
+
+// ==========================================================================
+// CORE LOGIC & ACCESSIBILITY CONTROLS
+// ==========================================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // Elements Selection
+    const btnFontIncrease = document.getElementById("btn-font-increase");
+    const btnFontDecrease = document.getElementById("btn-font-decrease");
+    const btnContrast = document.getElementById("btn-contrast");
+    const carouselContainer = document.getElementById("regions-carousel");
+    const accordionContainer = document.getElementById("faq-accordion");
+    
+    // 1. Accessibility: Font Resizing Engine
+    let currentFontSize = 16;
+    const updateBodyFontSize = (size) => {
+        if (size >= 12 && size <= 24) {
+            currentFontSize = size;
+            document.documentElement.style.fontSize = `${currentFontSize}px`;
+        }
+    };
+
+    btnFontIncrease.addEventListener("click", () => updateBodyFontSize(currentFontSize + 2));
+    btnFontDecrease.addEventListener("click", () => updateBodyFontSize(currentFontSize - 2));
+
+    // 2. Accessibility: Contrast Blinder Mode Toggle
+    btnContrast.addEventListener("click", () => {
+        document.body.classList.toggle("high-contrast");
+        const icon = btnContrast.querySelector(".to-contrast");
+        if(document.body.classList.contains("high-contrast")) {
+            icon.className = "fa-solid to-contrast fa-sun";
+        } else {
+            icon.className = "fa-solid to-contrast fa-moon";
+        }
+    });
+
+    // 3. Components: Render Regions Carousel
+    REGIONS_DATA.forEach(region => {
+        const card = document.createElement("div");
+        card.className = "carousel-card";
+        card.innerHTML = `
+            <div class="card-header-box">
+                <span class="region-tag">${region.tag}</span>
+                <h3>${region.name}</h3>
+            </div>
+            <p>${region.desc}</p>
+            <div class="region-meta"><strong>${region.meta}</strong></div>
+        `;
+        carouselContainer.appendChild(card);
+    });
+
+    // Carousel Mechanics
+    const prevBtn = document.getElementById("carousel-prev");
+    const nextBtn = document.getElementById("carousel-next");
+    let currentIndex = 0;
+
+    const moveCarousel = () => {
+        const cardWidth = document.querySelector(".carousel-card").offsetWidth + 32; // width + gap
+        carouselContainer.style.transform = `translateX(${-currentIndex * cardWidth}px)`;
+    };
+
+    nextBtn.addEventListener("click", () => {
+        const maxIndex = REGIONS_DATA.length - (window.innerWidth > 1024 ? 3 : window.innerWidth > 768 ? 2 : 1);
+        if (currentIndex < maxIndex) {
+            currentIndex++;
+            moveCarousel();
+        } else {
+            currentIndex = 0; // Loop back
+            moveCarousel();
+        }
+    });
+
+    prevBtn.addEventListener("click", () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+            moveCarousel();
+        }
+    });
+
+    // Recalculate layout on resize for safe layout clamps
+    window.addEventListener("resize", moveCarousel);
+
+    // 4. Components: Render FAQ Accordion
+    FAQ_DATA.forEach((item, index) => {
+        const accItem = document.createElement("div");
+        accItem.className = "accordion-item";
+        
+        accItem.innerHTML = `
+            <button class="accordion-header" aria-expanded="false" aria-controls="faq-answer-${index}">
+                ${item.question}
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div id="faq-answer-${index}" class="accordion-content">
+                <p>${item.answer}</p>
+            </div>
+        `;
+        accordionContainer.appendChild(accItem);
+    });
+
+    // Accordion Logic
+    const headers = document.querySelectorAll(".accordion-header");
+    headers.forEach(header => {
+        header.addEventListener("click", function() {
+            const content = this.nextElementSibling;
+            const icon = this.querySelector("i");
+            const isExpanded = this.getAttribute("aria-expanded") === "true";
+            
+            // Close all other items for neat UX
+            headers.forEach(h => {
+                if(h !== this) {
+                    h.setAttribute("aria-expanded", "false");
+                    h.nextElementSibling.style.maxHeight = null;
+                    h.querySelector("i").className = "fa-solid fa-chevron-down";
+                }
+            });
+
+            if (!isExpanded) {
+                this.setAttribute("aria-expanded", "true");
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.className = "fa-solid fa-chevron-up";
+            } else {
+                this.setAttribute("aria-expanded", "false");
+                content.style.maxHeight = null;
+                icon.className = "fa-solid fa-chevron-down";
+            }
+        });
+    });
